@@ -69,6 +69,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivatorEx.cs" />
     <Compile Include="AssemblyExtensions.cs" />
     <Compile Include="CTypeExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,7 +84,7 @@
         <Programmer />
         <ArchiveFilename>C:\Projects\Crestron\Simpl# Libraries\SSharpReflectionExtensionsLibrary\SSharpReflectionExtensionsLibrary\bin\Release\SSharpReflectionExtensionsLibrary.clz</ArchiveFilename>
         <MinFirmwareVersion>1.007.0017</MinFirmwareVersion>
-        <CompiledOn>1/2/2015 5:42:24 PM</CompiledOn>
+        <CompiledOn>3/12/2015 10:15:27 AM</CompiledOn>
         <AdditionalInfo />
         <EmbedSourceArchive>False</EmbedSourceArchive>
         <CopyTo />
