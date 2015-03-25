@@ -18,6 +18,9 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static CType[] GetTypeArray (object[] args)
 			{
+			if (args == null)
+				return CTypeEmptyArray;
+
 			return args.Select (a => a == null ? (CType)typeof(object) : (a is Type ? (CType)typeof(CType) : a.GetCType ())).ToArray ();
 			}
 
