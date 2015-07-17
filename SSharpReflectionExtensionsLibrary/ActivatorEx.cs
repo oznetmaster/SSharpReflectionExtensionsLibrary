@@ -9,8 +9,8 @@ namespace Crestron.SimplSharp.Reflection
 	{
 	public static class ActivatorEx
 		{
-		private const BindingFlags BfNonPublic = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-		private const BindingFlags BfPublic = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+		private const BindingFlags BfNonPublic = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+		private const BindingFlags BfPublic = BindingFlags.Public | BindingFlags.Instance;
 
 		public static object CreateInstance (Type type)
 			{

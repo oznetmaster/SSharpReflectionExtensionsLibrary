@@ -172,5 +172,27 @@ namespace Crestron.SimplSharp.Reflection
 			{
 			return type.GetCType ().GetProperties (bindingAttr);
 			}
+
+		public static bool IsRestricted (this Type type)
+			{
+			try
+				{
+				CType ct = null;
+				ct = type;
+				if (ct == null)
+					return true;
+				MemberTypes mt = MemberTypes.All;
+				mt = ct.MemberType;
+				return mt == MemberTypes.All;
+				}
+			catch (RestrictionViolationException)
+				{
+				return true;
+				}
+			catch (NullReferenceException)
+				{
+				return true;
+				}
+			}
 		}
 	}
