@@ -25,5 +25,16 @@ namespace Crestron.SimplSharp.Reflection
 			}
 
 		public static readonly CType[] CTypeEmptyArray = new CType[0];
+
+		public static bool IsRestricted (this CType ctype)
+			{
+			return false;
+			}
+
+		public static MethodInfo MakeGenericMethod (this MethodInfo mi, params Type[] typeArguments)
+			{
+			return mi.MakeGenericMethod (typeArguments.GetCTypes ());
+			}
+
 		}
 	}
