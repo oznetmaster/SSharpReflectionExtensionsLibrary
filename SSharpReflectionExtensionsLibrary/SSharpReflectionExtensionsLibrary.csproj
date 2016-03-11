@@ -73,6 +73,7 @@
     <Compile Include="AssemblyExtensions.cs" />
     <Compile Include="CDelegateEx.cs" />
     <Compile Include="CTypeExtensions.cs" />
+    <Compile Include="DelegateExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeExtensions.cs" />
     <None Include="Properties\ControlSystem.cfg" />
@@ -86,7 +87,7 @@
         <Programmer />
         <ArchiveFilename>C:\Projects\Crestron\Simpl# Libraries\SSharpReflectionExtensionsLibrary\SSharpReflectionExtensionsLibrary\bin\Release\SSharpReflectionExtensionsLibrary.clz</ArchiveFilename>
         <MinFirmwareVersion>1.007.0017</MinFirmwareVersion>
-        <CompiledOn>3/7/2016 8:56:22 AM</CompiledOn>
+        <CompiledOn>3/11/2016 9:45:48 AM</CompiledOn>
         <AdditionalInfo />
         <EmbedSourceArchive>False</EmbedSourceArchive>
         <CopyTo />
