@@ -25,5 +25,58 @@ namespace Crestron.SimplSharp.Reflection
 
 			return Assembly.Load (entry.Value);
 			}
+
+		private static string GetCaller ()
+			{
+			string stackTrace;
+			try
+				{
+				throw new Exception ();
+				}
+			catch (Exception ex)
+				{
+				stackTrace = ex.StackTrace;
+				}
+			string[] stackFrames = stackTrace.Split ('\n');
+			if (stackFrames.Length < 4)
+				return null;
+
+			string callingFrame = stackFrames[3].Trim ().Substring (3);
+			return callingFrame;
+			}
+
+		public static Assembly GetCallingAssembly ()
+			{
+			string caller = GetCaller ();
+			string methodName = caller.Substring (0, caller.IndexOf ('('));
+			string callingTypeName = methodName.Substring (0, methodName.LastIndexOf ('.'));
+			CType callingType = Type.GetType (callingTypeName) ?? FindType (callingTypeName);
+			return callingType == null ? null : callingType.Assembly;
+			}
+
+		private static Type FindType (string typeName)
+			{
+			var path = InitialParametersClass.ProgramDirectory.ToString ();
+			var dlls = Directory.GetFiles (path, "*.dll").Concat (Directory.GetFiles (path, "*.exe"));
+			foreach (var dll in dlls)
+				{
+				Assembly assembly;
+				try
+					{
+					assembly = Assembly.LoadFrom (dll);
+					}
+				catch
+					{
+					continue;
+					}
+				if (assembly == null)
+					continue;
+				var type = assembly.GetType (typeName);
+				if (type != null)
+					return type;
+				}
+
+			return null;
+			}
 		}
 	}
