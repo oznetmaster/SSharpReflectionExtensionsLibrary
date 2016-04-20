@@ -36,5 +36,15 @@ namespace Crestron.SimplSharp.Reflection
 			return mi.MakeGenericMethod (typeArguments.GetCTypes ());
 			}
 
+		public static string AssemblyFullName (this CType ctype)
+			{
+			return ((Type)ctype).AssemblyFullName ();
+			}
+
+		public static Version AssemblyVersion (this CType ctype)
+			{
+			return ((Type)ctype).AssemblyVersion ();
+			}
+
 		}
 	}
