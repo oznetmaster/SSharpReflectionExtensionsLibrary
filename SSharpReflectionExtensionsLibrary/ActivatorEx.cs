@@ -45,7 +45,32 @@ namespace Crestron.SimplSharp.Reflection
 
 			var ci = ct.GetConstructor (CTypeExtensions.GetTypeArray (args));
 			if (ci == null)
-				throw new MissingMethodException ();
+				{
+				if (Array.IndexOf (args, null) != -1)
+					{
+					var cis = ct.GetConstructors ();
+					if (cis.Length == 1)
+						{
+						var parms = cis[0].GetParameters ();
+						if (parms.Length == args.Length)
+							{
+							for (int ix = 0; ix < parms.Length; ++ix)
+								{
+								if (args[ix] != null)
+									continue;
+
+								if (parms[ix].ParameterType.IsPrimitive)
+									break;
+								}
+
+							ci = cis[0];
+							}
+						}
+					}
+
+				if (ci == null)
+					throw new MissingMethodException ();
+				}
 
 			return ci.Invoke (args);
 			}
@@ -54,7 +79,32 @@ namespace Crestron.SimplSharp.Reflection
 			{
 			var ci = type.GetCType ().GetConstructor (bindingAttr, binder, CTypeExtensions.GetTypeArray (args), null);
 			if (ci == null)
-				throw new MissingMethodException ();
+				{
+				if (Array.IndexOf (args, null) != -1)
+					{
+					var cis = type.GetCType ().GetConstructors (bindingAttr);
+					if (cis.Length == 1)
+						{
+						var parms = cis[0].GetParameters ();
+						if (parms.Length == args.Length)
+							{
+							for (int ix = 0; ix < parms.Length; ++ix)
+								{
+								if (args[ix] != null)
+									continue;
+
+								if (parms[ix].ParameterType.IsPrimitive)
+									break;
+								}
+
+							ci = cis[0];
+							}
+						}
+					}
+
+				if (ci == null)
+					throw new MissingMethodException ();
+				}
 
 			return ci.Invoke (bindingAttr, binder, args, culture);
 			}
