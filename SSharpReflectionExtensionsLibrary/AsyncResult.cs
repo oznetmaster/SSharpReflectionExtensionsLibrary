@@ -8,31 +8,31 @@ namespace Crestron.SimplSharp.CrestronIO
 	{
 	public class AsyncResult : IAsyncResult
 		{
-		private readonly CEvent cevent = new CEvent (false, false);
+		private readonly CEvent _cevent = new CEvent (false, false);
 
 		#region IAsyncResult Members
 
-		public object AsyncState
+		public virtual object AsyncState
+			{
+			get;
+			private set;
+			}
+
+		public virtual bool CompletedSynchronously
 			{
 			get;
 			internal set;
 			}
 
-		public bool CompletedSynchronously
+		public virtual bool IsCompleted
 			{
 			get;
 			internal set;
 			}
 
-		public bool IsCompleted
+		public virtual CEventHandle AsyncWaitHandle
 			{
-			get;
-			internal set;
-			}
-
-		public CEventHandle AsyncWaitHandle
-			{
-			get { return cevent; }
+			get { return _cevent; }
 			}
 
 		public object InnerObject
@@ -45,16 +45,22 @@ namespace Crestron.SimplSharp.CrestronIO
 		public bool EndInvokeCalled
 			{
 			get;
-			internal set;
+			set;
 			}
 
-		public Delegate AsyncDelegate
+		public virtual Delegate AsyncDelegate
 			{
 			get;
-			internal set;
+			private set;
 			}
 
 		internal object Result
+			{
+			get;
+			set;
+			}
+
+		internal Exception Exception
 			{
 			get;
 			set;

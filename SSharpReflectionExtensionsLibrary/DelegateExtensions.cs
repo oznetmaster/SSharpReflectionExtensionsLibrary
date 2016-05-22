@@ -50,20 +50,9 @@ namespace Crestron.SimplSharp
 			return (TResult)dlg.GetMethod().Invoke (dlg.Target, BindingFlags.Default, null, args, null);
 			}
 
-		private class InvokeAsyncResult : AsyncResult
-			{
-			public Exception Exception;
-
-			public InvokeAsyncResult (Delegate dlg, object obj)
-				: base (dlg, obj)
-				{
-				
-				}
-			}
-
 		private class InvokeInfo
 			{
-			public InvokeAsyncResult result;
+			public AsyncResult result;
 			public AsyncCallback callback;
 			public object state;
 			public object[] args;
@@ -71,7 +60,7 @@ namespace Crestron.SimplSharp
 
 		public static IAsyncResult BeginInvokeEx (this Delegate dlg, AsyncCallback callback, object obj, params object[] args)
 			{
-			var iar = new InvokeAsyncResult (dlg, obj);
+			var iar = new AsyncResult (dlg, obj);
 			var invokeInfo = new InvokeInfo {result = iar, callback = callback, state = obj, args = args};
 			CrestronInvoke.BeginInvoke (DoDelegate, invokeInfo);
 			return iar;
@@ -98,7 +87,7 @@ namespace Crestron.SimplSharp
 
 		public static object EndInvokeEx (this Delegate dlg, IAsyncResult result)
 			{
-			var asyncResult = result as InvokeAsyncResult;
+			var asyncResult = result as AsyncResult;
 			if (asyncResult == null)
 				throw new ArgumentException ("invalid IAsyncResult", "result");
 
