@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="ActivatorEx.cs" />
     <Compile Include="AssemblyExtensions.cs" />
+    <Compile Include="AsyncCallbackExtensions.cs" />
     <Compile Include="AsyncResult.cs" />
     <Compile Include="CDelegateEx.cs" />
     <Compile Include="CTypeExtensions.cs" />
@@ -88,7 +89,7 @@
         <Programmer />
         <ArchiveFilename>C:\Projects\Crestron\Simpl# Libraries\SSharpReflectionExtensionsLibrary\SSharpReflectionExtensionsLibrary\bin\Release\SSharpReflectionExtensionsLibrary.clz</ArchiveFilename>
         <MinFirmwareVersion>1.007.0017</MinFirmwareVersion>
-        <CompiledOn>5/16/2016 12:13:14 PM</CompiledOn>
+        <CompiledOn>5/23/2016 6:54:25 AM</CompiledOn>
         <AdditionalInfo />
         <EmbedSourceArchive>False</EmbedSourceArchive>
         <CopyTo />
