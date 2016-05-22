@@ -50,9 +50,20 @@ namespace Crestron.SimplSharp
 			return (TResult)dlg.GetMethod().Invoke (dlg.Target, BindingFlags.Default, null, args, null);
 			}
 
+		private class InvokeAsyncResult : AsyncResult
+			{
+			public Exception Exception;
+
+			public InvokeAsyncResult (Delegate dlg, object obj)
+				: base (dlg, obj)
+				{
+				
+				}
+			}
+
 		private class InvokeInfo
 			{
-			public AsyncResult result;
+			public InvokeAsyncResult result;
 			public AsyncCallback callback;
 			public object state;
 			public object[] args;
@@ -60,7 +71,7 @@ namespace Crestron.SimplSharp
 
 		public static IAsyncResult BeginInvokeEx (this Delegate dlg, AsyncCallback callback, object obj, params object[] args)
 			{
-			var iar = new AsyncResult (dlg, obj);
+			var iar = new InvokeAsyncResult (dlg, obj);
 			var invokeInfo = new InvokeInfo {result = iar, callback = callback, state = obj, args = args};
 			CrestronInvoke.BeginInvoke (DoDelegate, invokeInfo);
 			return iar;
@@ -70,7 +81,14 @@ namespace Crestron.SimplSharp
 			{
 			var invokeInfo = (InvokeInfo)state;
 
-			invokeInfo.result.Result = invokeInfo.result.AsyncDelegate.DynamicInvoke (invokeInfo.args);
+			try
+				{
+				invokeInfo.result.Result = invokeInfo.result.AsyncDelegate.DynamicInvoke (invokeInfo.args);
+				}
+			catch (TargetInvocationException tiex)
+				{
+				invokeInfo.result.Exception = tiex.InnerException;
+				}
 
 			invokeInfo.result.IsCompleted = true;
 			((CEvent)invokeInfo.result.AsyncWaitHandle).Set ();
@@ -80,16 +98,19 @@ namespace Crestron.SimplSharp
 
 		public static object EndInvokeEx (this Delegate dlg, IAsyncResult result)
 			{
-			var asyncResult = result as AsyncResult;
+			var asyncResult = result as InvokeAsyncResult;
 			if (asyncResult == null)
 				throw new ArgumentException ("invalid IAsyncResult", "result");
 
 			if (asyncResult.EndInvokeCalled)
-				throw new InvalidOperationException ("EndInvoke can only be called onece");
+				throw new InvalidOperationException ("EndInvoke can only be called once");
 			asyncResult.EndInvokeCalled = true;
 
 			if (!asyncResult.CompletedSynchronously)
 				asyncResult.AsyncWaitHandle.Wait ();
+
+			if (asyncResult.Exception != null)
+				throw asyncResult.Exception;
 
 			return asyncResult.Result;
 			}
