@@ -50,6 +50,8 @@ namespace Crestron.SimplSharp.Reflection
 			string caller = GetCaller ();
 			string methodName = caller.Substring (0, caller.IndexOf ('('));
 			string callingTypeName = methodName.Substring (0, methodName.LastIndexOf ('.'));
+			if (callingTypeName.EndsWith ("."))
+				callingTypeName = callingTypeName.Substring (0, callingTypeName.Length - 1);
 			CType callingType = Type.GetType (callingTypeName) ?? FindType (callingTypeName);
 			return callingType == null ? null : callingType.Assembly;
 			}
