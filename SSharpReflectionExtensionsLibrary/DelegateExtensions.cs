@@ -109,4 +109,23 @@ namespace Crestron.SimplSharp
 			return (TResult)dlg.EndInvokeEx (result);
 			}
 		}
+
+	public static class DelegateEx
+		{
+		public static Delegate Combine (params Delegate[] delegates)
+			{
+			if (delegates == null || delegates.Length == 0 || delegates.All (del => del == null))
+				return null;
+
+			if (delegates.Select (del => del.GetType ()).Distinct ().Count () != 1)
+				throw new ArgumentException ("All delegates must be of the same type");
+
+			var newDel = delegates[0];
+
+			for (int ix = 1; ix < delegates.Length; ++ix)
+				newDel = Delegate.Combine (newDel, delegates[ix]);
+
+			return newDel;
+			}
+		}
 	}

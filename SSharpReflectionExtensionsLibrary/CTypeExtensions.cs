@@ -24,6 +24,11 @@ namespace Crestron.SimplSharp.Reflection
 			return args.Select (a => a == null ? (CType)typeof(object) : (a is Type ? (CType)typeof(CType) : a.GetCType ())).ToArray ();
 			}
 
+		public static CType[] MakeTypeArray (Type[] types)
+			{
+			return types.Select (t => t.GetCType ()).ToArray ();
+			}
+
 		public static readonly CType[] CTypeEmptyArray = new CType[0];
 
 		public static bool IsRestricted (this CType ctype)
@@ -46,5 +51,9 @@ namespace Crestron.SimplSharp.Reflection
 			return ((Type)ctype).AssemblyVersion ();
 			}
 
+		public static ConstructorInfo GetConstructor (this CType ctype, Type[] types)
+			{
+			return ctype.GetConstructor (MakeTypeArray (types));
+			}
 		}
 	}

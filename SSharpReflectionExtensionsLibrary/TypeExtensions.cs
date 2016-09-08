@@ -263,5 +263,31 @@ namespace Crestron.SimplSharp.Reflection
 			var comp = ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
 			return type.GetCType ().GetInterfaces ().FirstOrDefault (iface => iface.Name.Equals (name, comp));
 			}
+
+		public static Type MakeArrayType (this Type type)
+			{
+			return Array.CreateInstance (type, 0).GetType ();
+			}
+
+		public static Type MakeArrayType (this Type type, int rank)
+			{
+			return Array.CreateInstance (type, new int[rank]).GetType ();
+			}
+
+		public static bool IsSerializable (this Type type)
+			{
+			if (type.GetCustomAttributes (typeof (SerializableAttribute), false).Length != 0)
+				return true;
+
+			for (Type t = type.UnderlyingSystemType; t != null; t = t.BaseType)
+				{
+				if ((t == typeof (Enum)) || (t == typeof (Delegate)))
+					{
+					return true;
+					}
+				}
+
+			return false;
+			}
 		}
 	}
