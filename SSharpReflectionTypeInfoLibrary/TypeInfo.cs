@@ -49,12 +49,12 @@ namespace Crestron.SimplSharp.Reflection
 
 		public virtual CType[] GenericTypeArguments
 			{
-			get { return emptyCTypeArray; }
+			get { return IsGenericTypeDefinition ? emptyCTypeArray : GetGenericArguments (); }
 			}
 
 		public virtual CType[] GenericTypeParameters
 			{
-			get { return emptyCTypeArray; }
+			get { return IsGenericTypeDefinition ? GetGenericArguments () : emptyCTypeArray; }
 			}
 
 		public virtual IEnumerable<CType> ImplementedInterfaces

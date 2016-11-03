@@ -5,11 +5,20 @@ using Crestron.SimplSharp.CrestronIO;
 using Crestron.SimplSharp.CrestronXmlLinq;
 using Crestron.SimplSharp.CrestronXml;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Crestron.SimplSharp.Reflection
 	{
 	public class AssemblyEx
 		{
+		private static readonly List<Assembly> assemblies;
+		static AssemblyEx ()
+			{
+			assemblies = new List<Assembly> ();
+
+			GetAllAssemblies ();
+			}
+
 		public static Assembly GetEntryAssembly ()
 			{
 			string appDir = InitialParametersClass.ProgramDirectory.ToString ();
@@ -50,13 +59,27 @@ namespace Crestron.SimplSharp.Reflection
 			string caller = GetCaller ();
 			string methodName = caller.Substring (0, caller.IndexOf ('('));
 			string callingTypeName = methodName.Substring (0, methodName.LastIndexOf ('.'));
-			if (callingTypeName.EndsWith ("."))
-				callingTypeName = callingTypeName.Substring (0, callingTypeName.Length - 1);
-			CType callingType = Type.GetType (callingTypeName) ?? FindType (callingTypeName);
+
+			CType callingType;
+			while (true)
+				{
+				if (callingTypeName.EndsWith ("."))
+					callingTypeName = callingTypeName.Substring (0, callingTypeName.Length - 1);
+				callingType = Type.GetType (callingTypeName) ?? FindType (callingTypeName);
+				if (callingType != null)
+					break;
+
+				int ix = callingTypeName.LastIndexOf ('.');
+				if (ix == -1)
+					break;
+
+				callingTypeName = callingTypeName.Substring (0, ix);
+				}
+			
 			return callingType == null ? null : callingType.Assembly;
 			}
 
-		private static Type FindType (string typeName)
+		private static void GetAllAssemblies ()
 			{
 			var path = InitialParametersClass.ProgramDirectory.ToString ();
 			var dlls = Directory.GetFiles (path, "*.dll").Concat (Directory.GetFiles (path, "*.exe"));
@@ -71,14 +94,17 @@ namespace Crestron.SimplSharp.Reflection
 					{
 					continue;
 					}
+
 				if (assembly == null)
 					continue;
-				var type = assembly.GetType (typeName);
-				if (type != null)
-					return type;
-				}
 
-			return null;
+				assemblies.Add (assembly);
+				}
+			}
+
+		private static Type FindType (string typeName)
+			{
+			return assemblies.Select (assembly => assembly.GetType (typeName)).FirstOrDefault (type => type != null);
 			}
 		}
 	}
