@@ -26,7 +26,7 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static CType[] MakeTypeArray (Type[] types)
 			{
-			return types.Select (t => t.GetCType ()).ToArray ();
+			return types.Select (t => (CType)t).ToArray ();
 			}
 
 		public static readonly CType[] CTypeEmptyArray = new CType[0];
