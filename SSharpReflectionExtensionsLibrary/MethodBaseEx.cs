@@ -39,7 +39,7 @@ namespace Crestron.SimplSharp.Reflection
 		{
 		public static MethodBase GetCurrentMethod ()
 			{
-			return GetStackMethod (0);
+			return GetStackMethod (1);
 			}
 
 		public static MethodBase GetStackMethod (int level)
@@ -47,17 +47,23 @@ namespace Crestron.SimplSharp.Reflection
 			if (level < 0)
 				throw new ArgumentOutOfRangeException ("level");
 
-			var caller = ReflectionUtilities.GetCaller (level + 2);
-			var callingType = ReflectionUtilities.GetCallingType (caller);
+			var stackFrame = ReflectionUtilities.GetStackFrame (level + 1);
+
+			return GetMethodFromStackFrame (stackFrame);
+			}
+
+		private static MethodBase  GetMethodFromStackFrame (string stackFrame)
+			{
+			var callingType = ReflectionUtilities.GetCallingType (stackFrame);
 			if (callingType == null)
 				return null;
 
-			var ix = caller.IndexOf ('(');
-			string fullMethodName = caller.Substring (0, ix);
+			var ix = stackFrame.IndexOf ('(');
+			string fullMethodName = stackFrame.Substring (0, ix);
 			string methodName = fullMethodName.Substring (fullMethodName.LastIndexOf ('.') + 1);
 			if (methodName[methodName.Length - 1] == ']')
 				methodName = methodName.Substring (0, methodName.IndexOf ('['));
-			string parString = caller.Substring (ix + 1, caller.Length - ix - 2);
+			string parString = stackFrame.Substring (ix + 1, stackFrame.Length - ix - 2);
 
 			CType[] types;
 			if (parString.Length != 0)
@@ -84,39 +90,68 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static string GetCurrentMethodNameWithParameters ()
 			{
-			return GetStackMethodNameWithParameters (0);
+			return GetStackMethodNameWithParameters (1);
 			}
 
 		public static string GetStackMethodNameWithParameters (int level)
 			{
-			return ReflectionUtilities.GetCaller (level + 2);
+			return ReflectionUtilities.GetStackFrame (level + 1);
 			}
 
 		public static string GetCurrentMethodName ()
 			{
-			return GetStackMethodName (0);
+			return GetStackMethodName (1);
 			}
 
 		public static string GetStackMethodName (int level)
 			{
-			var caller = ReflectionUtilities.GetCaller (level + 2);
-			var ix = caller.IndexOf ('(');
-			return caller.Substring (0, ix);
+			var stackFrame = ReflectionUtilities.GetStackFrame (level + 1);
+			var ix = stackFrame.IndexOf ('(');
+			return stackFrame.Substring (0, ix);
 			}
 
 		public static MethodBase GetCallingMethod ()
 			{
-			return GetStackMethod (1);         
+			return GetStackMethod (2);         
 			}
 
 		public static string GetCallingMethodNameWithParameters ()
 			{
-			return GetStackMethodNameWithParameters (1);
+			return GetStackMethodNameWithParameters (2);
 			}
 
 		public static string GetCallingMethodName ()
 			{
-			return GetStackMethodName (1);
+			return GetStackMethodName (2);
+			}
+
+		public static MethodBase GetExceptionMethod (Exception ex)
+			{
+			if (ex == null)
+				throw new ArgumentNullException ("ex");
+
+			var stackFrame = ReflectionUtilities.GetStackFrame (ex.StackTrace, 0);
+
+			return GetMethodFromStackFrame (stackFrame);
+			}
+
+		public static string GetExceptionMethodName (Exception ex)
+			{
+			if (ex == null)
+				throw new ArgumentNullException ("ex");
+
+			var stackFrame = ReflectionUtilities.GetStackFrame (ex.StackTrace, 0);
+			var ix = stackFrame.IndexOf ('(');
+
+			return stackFrame.Substring (0, ix);
+			}
+
+		public static string GetExceptionMethodNameAndParameters (Exception ex)
+			{
+			if (ex == null)
+				throw new ArgumentNullException ("ex");
+
+			return ReflectionUtilities.GetStackFrame (ex.StackTrace, 0);
 			}
 		}
 	}

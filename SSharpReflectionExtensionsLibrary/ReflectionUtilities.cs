@@ -45,7 +45,7 @@ namespace Crestron.SimplSharp.Reflection
 			GetAllAssemblies ();
 			}
 
-		internal static string GetCaller (int level)
+		internal static string GetStackFrame (int level)
 			{
 			string stackTrace;
 			try
@@ -56,6 +56,12 @@ namespace Crestron.SimplSharp.Reflection
 				{
 				stackTrace = ex.StackTrace;
 				}
+
+			return GetStackFrame (stackTrace, level + 1);
+			}
+
+		internal static string GetStackFrame (string stackTrace, int level)
+			{
 			string[] stackFrames = stackTrace.Split ('\n');
 			if (stackFrames.Length <= level)
 				return null;
@@ -66,7 +72,7 @@ namespace Crestron.SimplSharp.Reflection
 
 		internal static CType GetCallingType (int level)
 			{
-			return GetCallingType (GetCaller (level));
+			return GetCallingType (GetStackFrame (level + 1));
 			}
 
 		internal static CType GetCallingType (string callingFrame)
