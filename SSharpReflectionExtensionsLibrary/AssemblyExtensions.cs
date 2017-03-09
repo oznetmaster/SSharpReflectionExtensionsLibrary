@@ -57,7 +57,7 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static Assembly GetCallingAssembly ()
 			{
-			var callingType = ReflectionUtilities.GetCallingType (3);
+			var callingType = ReflectionUtilities.GetCallingType (2);
 
 			return callingType == null ? null : callingType.Assembly;
 			}
