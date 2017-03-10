@@ -72,7 +72,7 @@ namespace Crestron.SimplSharp.Reflection
 
 			if (types.Any (t => t == null))
 				{
-				var members = callingType.GetMember (methodName);
+				var members = callingType.GetMember (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 				var methods = members.Where (m => m.MemberType == MemberTypes.Method).ToArray ();
 
 				if (methods.Length != 1)
