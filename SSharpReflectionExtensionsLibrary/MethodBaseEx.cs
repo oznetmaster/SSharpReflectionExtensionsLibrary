@@ -50,6 +50,8 @@ namespace Crestron.SimplSharp.Reflection
 
 		private static MethodBase  GetMethodFromStackFrame (string stackFrame)
 			{
+			string[] genericArguments;
+
 			var callingType = ReflectionUtilities.GetCallingType (stackFrame);
 			if (callingType == null)
 				return null;
@@ -58,7 +60,14 @@ namespace Crestron.SimplSharp.Reflection
 			string fullMethodName = stackFrame.Substring (0, ix);
 			string methodName = fullMethodName.Substring (fullMethodName.LastIndexOf ('.') + 1);
 			if (methodName[methodName.Length - 1] == ']')
-				methodName = methodName.Substring (0, methodName.IndexOf ('['));
+				{
+				var iy = methodName.IndexOf ('[');
+				genericArguments = methodName.Substring (iy + 1, methodName.Length - 1 - iy - 1).Split (',');
+				methodName = methodName.Substring (0, iy);
+				}
+			else
+				genericArguments = new string[0];
+
 			string parString = stackFrame.Substring (ix + 1, stackFrame.Length - ix - 2);
 
 			CType[] types;
@@ -72,14 +81,14 @@ namespace Crestron.SimplSharp.Reflection
 
 			if (types.Any (t => t == null))
 				{
-				var members = callingType.GetMember (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-				var methods = members.Where (m => m.MemberType == MemberTypes.Method).ToArray ();
+				if (genericArguments.Length != 0)
+					return callingType.GetGenericMethod (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 
-				if (methods.Length != 1)
-					return null;
-
-				return (MethodBase)methods[0];
+				return callingType.GetMethod (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 				}
+
+			if (genericArguments.Length != 0) 
+				return callingType.GetGenericMethod (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static, genericArguments, types);
 
 			return callingType.GetMethod (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static, null, types, null);
 			}

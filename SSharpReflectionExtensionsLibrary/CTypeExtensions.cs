@@ -83,5 +83,78 @@ namespace Crestron.SimplSharp.Reflection
 			{
 			return ctype.GetConstructor (MakeTypeArray (types));
 			}
+
+		public static MethodInfo GetGenericMethod (this CType ctype, string name)
+			{
+			var members = ctype.GetMember (name).Where (m => m.MemberType == MemberTypes.Method && ((MethodInfo)m).IsGenericMethod).ToArray ();
+			if (members.Length == 0)
+				return null;
+			if (members.Length == 1)
+				return (MethodInfo)members[0];
+			throw new AmbiguousMatchException ("name is not unique", null);
+			}
+
+		public static MethodInfo GetGenericMethod (this CType ctype, string name, string[] genericArguments, CType[] types)
+			{
+			if (types == null || types.Any (t => t == null))
+				throw new ArgumentNullException ("types");
+
+			if (types.Length == 0)
+				return ctype.GetGenericMethod (name);
+
+			var members = ctype.GetMember (name).Where (m => m.MemberType == MemberTypes.Method && ((MethodInfo)m).IsGenericMethod).ToArray ();
+			if (members.Length == 0)
+				return null;
+
+			var methods = members.Cast<MethodInfo> ().Where (m => MatchParameters (m, genericArguments, types)).ToArray ();
+			if (methods.Length == 0)
+				return null;
+			if (methods.Length == 1)
+				return methods[0];
+			throw new AmbiguousMatchException ("name is not unique", null);
+			}
+
+		public static MethodInfo GetGenericMethod (this CType ctype, string name, BindingFlags bindingAttr)
+			{
+			var members = ctype.GetMember (name, bindingAttr).Where (m => m.MemberType == MemberTypes.Method && ((MethodInfo)m).IsGenericMethod).ToArray ();
+			if (members.Length == 0)
+				return null;
+			if (members.Length == 1)
+				return (MethodInfo)members[0];
+			throw new AmbiguousMatchException ("name is not unique", null);
+			}
+
+		public static MethodInfo GetGenericMethod (this CType ctype, string name, BindingFlags bindingAttr, string[] genericArguments, CType[] types)
+			{
+			if (types == null || types.Any (t => t == null))
+				throw new ArgumentNullException ("types");
+
+			if (types.Length == 0)
+				return ctype.GetGenericMethod (name, bindingAttr);
+
+			var members = ctype.GetMember (name, bindingAttr).Where (m => m.MemberType == MemberTypes.Method && ((MethodInfo)m).IsGenericMethod).ToArray ();
+			if (members.Length == 0)
+				return null;
+
+			var methods = members.Cast<MethodInfo> ().Where (m => MatchParameters (m, genericArguments, types)).ToArray ();
+			if (methods.Length == 0)
+				return null;
+			if (methods.Length == 1)
+				return methods[0];
+			throw new AmbiguousMatchException ("name is not unique", null);
+			}
+
+		private static bool MatchParameters (MethodInfo mi, string[] genericArguments, CType[] types)
+			{
+			bool typeContainsGeneric = types.Any (t => t.IsGenericParameter);
+
+			if (!mi.IsGenericMethodDefinition && !mi.ContainsGenericParameters && !typeContainsGeneric)
+				return mi.GetParameters ().Select (p => p.ParameterType).SequenceEqual (types);
+
+			if (mi.IsGenericMethodDefinition || mi.ContainsGenericParameters)
+				return mi.GetGenericArguments ().Where (p => p.IsGenericParameter).Select (p => p.Name).SequenceEqual (genericArguments);
+
+			return false;
+			}
 		}
 	}
