@@ -27,11 +27,7 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
-using Crestron.SimplSharp.CrestronIO;
 
 namespace Crestron.SimplSharp.Reflection
 	{
@@ -82,7 +78,7 @@ namespace Crestron.SimplSharp.Reflection
 				if (methods.Length != 1)
 					return null;
 
-				return (MethodBase)methods[1];
+				return (MethodBase)methods[0];
 				}
 
 			return callingType.GetMethod (methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static, null, types, null);

@@ -29,20 +29,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
 using Crestron.SimplSharp.CrestronIO;
 
 namespace Crestron.SimplSharp.Reflection
 	{
 	internal static class ReflectionUtilities
 		{
-		private static readonly List<Assembly> assemblies;
+		private static readonly List<Assembly> Assemblies;
+
 		static ReflectionUtilities ()
 			{
-			assemblies = new List<Assembly> ();
+			Assemblies = new List<Assembly> ();
 
 			GetAllAssemblies ();
+
+			Cache = new Dictionary<string, TypeCacheEntry> ();
 			}
 
 		internal static string GetStackFrame (int level)
@@ -122,10 +123,11 @@ namespace Crestron.SimplSharp.Reflection
 				if (assembly == null)
 					continue;
 
-				assemblies.Add (assembly);
+				Assemblies.Add (assembly);
 				}
 			}
-		internal static Dictionary<string, Type> dictTypes = new Dictionary<string, Type>
+
+		private static readonly Dictionary<string, Type> DictTypes = new Dictionary<string, Type>
 			{
 				{"bool", typeof (bool)},
 				{"byte", typeof (byte)},
@@ -142,21 +144,129 @@ namespace Crestron.SimplSharp.Reflection
 				{"short", typeof (short)},
 				{"ushort", typeof (ushort)},
 				{"string", typeof (string)},
+				{"Boolean", typeof (Boolean)},
+				{"Byte", typeof (Byte)},
+				{"SByte", typeof (SByte)},
+				{"Char", typeof (Char)},
+				{"Decimal", typeof (Decimal)},
+				{"Double", typeof (Double)},
+				{"Single", typeof (Single)},
+				{"Int32", typeof (Int32)},
+				{"UInt32", typeof (UInt32)},
+				{"Int64", typeof (Int64)},
+				{"UInt64", typeof (UInt64)},
+				{"Object", typeof (Object)},
+				{"Int16", typeof (Int16)},
+				{"UInt16", typeof (UInt16)},
+				{"String", typeof (String)},
+				{"DateTime", typeof (DateTime)},
+				{"System.Boolean", typeof (Boolean)},
+				{"System.Byte", typeof (Byte)},
+				{"System.SByte", typeof (SByte)},
+				{"System.Char", typeof (Char)},
+				{"System.Decimal", typeof (Decimal)},
+				{"System.Double", typeof (Double)},
+				{"System.Single", typeof (Single)},
+				{"System.Int32", typeof (Int32)},
+				{"System.UInt32", typeof (UInt32)},
+				{"System.Int64", typeof (Int64)},
+				{"System.UInt64", typeof (UInt64)},
+				{"System.Object", typeof (Object)},
+				{"System.Int16", typeof (Int16)},
+				{"System.UInt16", typeof (UInt16)},
+				{"System.String", typeof (String)},
+				{"System.DateTime", typeof (DateTime)},
 			};
+
+		private static readonly string[] SystemNamespaces = { "System.", "System.Text.", "System.Collections.", "System.Collections.Generic.", "System.Collections.ObjectModel.", "System.Globalization.", "System.Configuration.Assemblies." };
+
+		private class TypeCacheEntry
+			{
+			public Type Type;
+			public uint Order;
+			}
+
+		private static readonly Dictionary<string, TypeCacheEntry> Cache;
+		private static uint _cacheOrder = 0;
+
+		private const int Cachemaxsize = 1000;
+		private const uint Cachemaxorder = UInt32.MaxValue - Cachemaxsize;
+
 
 		internal static Type FindType (string typeName)
 			{
 			Type easyType;
-			if (dictTypes.TryGetValue (typeName, out easyType))
-				return easyType;
-			if (!typeName.Contains ('.'))
-				typeName = "System." + typeName;
-			easyType= Type.GetType (typeName);
-			if (easyType != null)
+			if (DictTypes.TryGetValue (typeName, out easyType))
 				return easyType;
 
-			return assemblies.Select (assembly => assembly.GetType (typeName)).FirstOrDefault (type => type != null);
+			lock (Cache)
+				{
+				TypeCacheEntry cachedType;
+				if (Cache.TryGetValue (typeName, out cachedType))
+					{
+					if (cachedType.Order != _cacheOrder)
+						{
+						cachedType.Order = ++_cacheOrder;
+						if (_cacheOrder > Cachemaxorder)
+							ReorderCache ();
+						}
+
+					return cachedType.Type;
+					}
+				}
+
+			if (!typeName.Contains ('.'))
+				foreach (var sys in SystemNamespaces)
+				{
+				var sysName = sys + typeName;
+				easyType = Type.GetType (sysName);
+				if (easyType != null)
+					{
+					AddToCache (sysName, easyType);
+
+					return easyType;
+					}
+				}
+
+			var foundType = Assemblies.Select (assembly => assembly.GetType (typeName)).FirstOrDefault (type => type != null);
+
+			if (foundType != null)
+				AddToCache(typeName, foundType);
+
+			return foundType;
 			}
 
+		private static void AddToCache (string typeName, Type type)
+			{
+			lock (Cache)
+				{
+				Cache[typeName] = new TypeCacheEntry { Type = type, Order = ++_cacheOrder };
+				if (_cacheOrder > Cachemaxorder)
+					ReorderCache ();
+				}
+
+			if (Cache.Count > Cachemaxsize)
+				{
+				lock (Cache)
+					{
+					if (Cache.Count <= Cachemaxsize)
+						return;
+
+					var orderedTypeNames = Cache.OrderBy (c => c.Value.Order).Take (Cache.Count - Cachemaxsize).Select (c => c.Key).ToArray ();
+					foreach (var cachedTypeName in orderedTypeNames)
+						Cache.Remove (cachedTypeName);
+					}
+				}
+			}
+
+		private static void ReorderCache ()
+			{
+			var orderedTypeNames = Cache.OrderBy (c => c.Value.Order).Select (c => c.Key).ToArray ();
+
+			_cacheOrder = 0;
+
+			foreach (var cachedTypeName in orderedTypeNames)
+				Cache[cachedTypeName].Order = ++_cacheOrder;
+			}
 		}
 	}
