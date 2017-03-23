@@ -66,5 +66,16 @@ namespace Crestron.SimplSharp.Reflection
 			{
 			return CDelegate.CreateDelegate (typeof (TDelegate), null, typeof(TTarget).GetCType ().GetMethod (method)) as TDelegate;
 			}
+
+		public static TDelegate CreateDelegate<TDelegate> (Type type, object target, string method) where TDelegate : class
+			{
+			return CDelegate.CreateDelegate (typeof (TDelegate), type, target == null ? null : target.GetCType ().GetMethod (method)) as TDelegate;
+			}
+
+		public static TDelegate CreateDelegate<TDelegate> (CType type, object target, string method) where TDelegate : class
+			{
+			return CDelegate.CreateDelegate (typeof (TDelegate), type, target == null ? null : target.GetCType ().GetMethod (method)) as TDelegate;
+			}
+
 		}
 	}
