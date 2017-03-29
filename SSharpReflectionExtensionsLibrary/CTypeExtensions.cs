@@ -39,6 +39,11 @@ namespace Crestron.SimplSharp.Reflection
 			return obj.GetType ();
 			}
 
+		public static CType GetCType (this CType ctype)
+			{
+			return ctype;
+			}
+
 		public static CType ctypeof<T> ()
 			{
 			return (typeof (T));
@@ -62,6 +67,11 @@ namespace Crestron.SimplSharp.Reflection
 		public static bool IsRestricted (this CType ctype)
 			{
 			return false;
+			}
+
+		public static TypeCode GetTypeCode (this CType ctype)
+			{
+			return CType.GetTypeCode (ctype);
 			}
 
 		public static MethodInfo MakeGenericMethod (this MethodInfo mi, params Type[] typeArguments)
@@ -156,5 +166,16 @@ namespace Crestron.SimplSharp.Reflection
 
 			return false;
 			}
+
+		public static Type MakeArrayType (this CType type)
+			{
+			return Array.CreateInstance (type, 0).GetType ();
+			}
+
+		public static Type MakeArrayType (this CType type, int rank)
+			{
+			return Array.CreateInstance (type, new int[rank]).GetType ();
+			}
+
 		}
 	}
