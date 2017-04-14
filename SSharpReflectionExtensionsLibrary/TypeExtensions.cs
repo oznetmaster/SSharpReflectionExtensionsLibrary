@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Crestron.SimplSharp;
+using System.Globalization;
 
 namespace Crestron.SimplSharp.Reflection
 	{
@@ -231,12 +232,33 @@ namespace Crestron.SimplSharp.Reflection
 			return assemblyName;
 			}
 
+		public static string AssemblyName (this Type type)
+			{
+			var assemblyFullName = type.AssemblyFullName ();
+			var ix = assemblyFullName.IndexOf (',');
+			return ix == -1 ? assemblyFullName : assemblyFullName.Substring (0, ix);
+			}
+
 		public static Version AssemblyVersion (this Type type)
 			{
 			var assemblyFullName = type.AssemblyFullName ();
 			var ix = assemblyFullName.IndexOf ("Version=", StringComparison.InvariantCulture);
-			var version = assemblyFullName.Substring (ix + 8, assemblyFullName.IndexOf (',') - 1);
+			var version = assemblyFullName.Substring (ix + 8, assemblyFullName.IndexOf (',', ix + 8) - (ix + 8));
 			return new Version (version);
+			}
+
+		public static CultureInfo AssemblyCultureInfo (this Type type)
+			{
+			var assemblyFullName = type.AssemblyFullName ();
+			var ix = assemblyFullName.IndexOf ("Culture=", StringComparison.InvariantCulture);
+			if (ix == -1)
+				return CultureInfo.InvariantCulture;
+
+			var culture = assemblyFullName.Substring (ix + 8, assemblyFullName.IndexOf (',', ix + 8) - (ix + 8));
+			if (culture == "neutral")
+				return CultureInfo.InvariantCulture;
+
+			return CultureInfo.GetCultureInfo (culture);
 			}
 
 		public static void SplitFullyQualifiedTypeName (string fullyQualifiedTypeName, out string typeName, out string assemblyName)
