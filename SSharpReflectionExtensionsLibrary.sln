@@ -13,11 +13,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSCoreReflectionExtensionsL
 EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 1
+		SccNumberOfProjects = 3
 		SccProjectUniqueName0 = SSharpReflectionExtensionsLibrary\\SSharpReflectionExtensionsLibrary.csproj
 		SccProjectName0 = $/S#\u0020Libraries/SSharpReflectionExtensionsLibrary
 		SccLocalPath0 = SSharpReflectionExtensionsLibrary
 		SccProvider0 = MSSCCI:SourceGear\u0020Vault\u0020Professional\u0020Classic\u0020Client
+		CanCheckoutShared = false
+		SccProjectUniqueName1 = SSharpReflectionTypeInfoLibrary\\SSharpReflectionTypeInfoLibrary.csproj
+		SccProjectName1 = $/S#\u0020Libraries/SSharpReflectionTypeInfoLibrary
+		SccLocalPath1 = SSharpReflectionTypeInfoLibrary
+		SccProvider1 = MSSCCI:SourceGear\u0020Vault\u0020Professional\u0020Classic\u0020Client
+		CanCheckoutShared = false
+		SccProjectUniqueName2 = SSCoreReflectionExtensionsLibrary\\SSCoreReflectionExtensionsLibrary.csproj
+		SccProjectName2 = $/S#\u0020Libraries/CoreFx\u0020Ports/SSCoreReflectionExtensionsLibrary
+		SccLocalPath2 = SSCoreReflectionExtensionsLibrary
+		SccProvider2 = MSSCCI:SourceGear\u0020Vault\u0020Professional\u0020Classic\u0020Client
 		CanCheckoutShared = false
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

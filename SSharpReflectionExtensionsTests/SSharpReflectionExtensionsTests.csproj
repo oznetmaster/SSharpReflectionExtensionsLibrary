@@ -4,12 +4,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{892002D0-0898-49FE-B643-DC893B38A952}</ProjectGuid>
+    <ProjectGuid>{C9A13916-6FB2-4E60-A1EE-88CB1B3EF129}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SSCoreReflectionExtensionsLibrary</RootNamespace>
-    <AssemblyName>SSCoreReflectionExtensionsLibrary</AssemblyName>
-    <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92500};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <RootNamespace>SSharpReflectionExtensionsTests</RootNamespace>
+    <AssemblyName>SSharpReflectionExtensionsTests</AssemblyName>
+    <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92300};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
     <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
     <OSVersion>5.0</OSVersion>
@@ -18,10 +18,6 @@
     <NativePlatformName>Windows CE</NativePlatformName>
     <FormFactorID>
     </FormFactorID>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <AllowedReferenceRelatedFileExtensions>.allowedReferenceRelatedFileExtensions</AllowedReferenceRelatedFileExtensions>
@@ -29,7 +25,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETCF</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <FileAlignment>512</FileAlignment>
@@ -48,47 +44,52 @@
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
-    <DefineConstants>NETCF</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="SimplSharpCustomAttributesInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\ProgramData\Crestron\SDK\SimplSharpCustomAttributesInterface.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="SimplSharpHelperInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\ProgramData\Crestron\SDK\SimplSharpHelperInterface.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SimplSharpPro, Version=1.5.2.2, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\ProgramData\Crestron\SDK\SimplSharpPro.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="SimplSharpReflectionInterface, Version=1.0.5583.25238, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\ProgramData\Crestron\SDK\SimplSharpReflectionInterface.dll</HintPath>
     </Reference>
-    <Reference Include="SSharpReflectionExtensionsLibrary, Version=1.0.0.24762, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="SSharpNunitLite, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\SSharpReflectionExtensionsLibrary\bin\Release\SSharpReflectionExtensionsLibrary.dll</HintPath>
+      <HintPath>..\..\..\Simpl# Pro Libraries\SSharpNUnitLite3\SSharpNunitLite\bin\Release\SSharpNunitLite.dll</HintPath>
     </Reference>
-    <Reference Include="SSharpReflectionTypeInfoLibrary, Version=1.0.0.18507, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="SSharpReflectionExtensionsLibrary, Version=1.0.0.20138, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\SSharpReflectionTypeInfoLibrary\bin\Release\SSharpReflectionTypeInfoLibrary.dll</HintPath>
+      <HintPath>..\SSharpReflectionExtensionsLibrary\bin\Debug\SSharpReflectionExtensionsLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomAttributeExtensions.cs" />
-    <Compile Include="CustomAttributeInheritanceRules.cs" />
-    <Compile Include="CustomAttributeSearcher.cs" />
-    <Compile Include="InheritedPropertyInfo.cs" />
-    <Compile Include="MemberEnumerator.cs" />
-    <Compile Include="MemberPolicies.cs" />
+    <Compile Include="AssemblyExTests.cs" />
+    <Compile Include="MethodBaseExTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RuntimeReflectionExtensions.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+    </VisualStudio>
+  </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>rem  S# preparation will execute after these operations</PostBuildEvent>
+    <PostBuildEvent>rem S# Pro preparation will execute after these operations</PostBuildEvent>
   </PropertyGroup>
 </Project>
