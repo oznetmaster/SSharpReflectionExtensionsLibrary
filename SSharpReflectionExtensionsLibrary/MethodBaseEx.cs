@@ -48,7 +48,7 @@ namespace Crestron.SimplSharp.Reflection
 			return GetMethodFromStackFrame (stackFrame);
 			}
 
-		private static MethodBase  GetMethodFromStackFrame (string stackFrame)
+		private static MethodBase GetMethodFromStackFrame (string stackFrame)
 			{
 			string[] genericArguments;
 
@@ -130,7 +130,7 @@ namespace Crestron.SimplSharp.Reflection
 			return GetStackMethodName (2);
 			}
 
-		public static MethodBase GetExceptionMethod (Exception ex)
+		public static MethodBase GetExceptionMethod (this Exception ex)
 			{
 			if (ex == null)
 				throw new ArgumentNullException ("ex");
@@ -140,7 +140,7 @@ namespace Crestron.SimplSharp.Reflection
 			return GetMethodFromStackFrame (stackFrame);
 			}
 
-		public static string GetExceptionMethodName (Exception ex)
+		public static string GetExceptionMethodName (this Exception ex)
 			{
 			if (ex == null)
 				throw new ArgumentNullException ("ex");
@@ -151,7 +151,7 @@ namespace Crestron.SimplSharp.Reflection
 			return stackFrame.Substring (0, ix);
 			}
 
-		public static string GetExceptionMethodNameAndParameters (Exception ex)
+		public static string GetExceptionMethodNameAndParameters (this Exception ex)
 			{
 			if (ex == null)
 				throw new ArgumentNullException ("ex");

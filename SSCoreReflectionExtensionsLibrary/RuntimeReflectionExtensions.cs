@@ -90,9 +90,19 @@ namespace Crestron.SimplSharp.Reflection
 			return type.GetMethod (name, parameters);
 			}
 
+		public static MethodInfo GetRuntimeMethod (this CType type, String name, Type[] parameters)
+			{
+			return type.GetCType().GetMethod (name, CTypeExtensions.MakeTypeArray (parameters));
+			}
+
 		public static MethodInfo GetRuntimeMethod (this Type type, String name, CType[] parameters)
 			{
 			return type.GetMethod (name, parameters);
+			}
+
+		public static MethodInfo GetRuntimeMethod (this Type type, String name, Type[] parameters)
+			{
+			return type.GetCType().GetMethod (name, CTypeExtensions.MakeTypeArray (parameters));
 			}
 
 		public static PropertyInfo GetRuntimeProperty (this CType type, String name)
