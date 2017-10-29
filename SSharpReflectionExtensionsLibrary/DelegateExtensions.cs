@@ -35,6 +35,7 @@ using Crestron.SimplSharp.CrestronIO;
 using Crestron.SimplSharp.Reflection;
 using IAsyncResult = Crestron.SimplSharp.CrestronIO.IAsyncResult;
 using AsyncCallback = Crestron.SimplSharp.CrestronIO.AsyncCallback;
+using WaitCallback = Crestron.SimplSharp.CrestronSharpHelperDelegate;
 
 namespace Crestron.SimplSharp
 	{
@@ -86,11 +87,35 @@ namespace Crestron.SimplSharp
 			public object[] args;
 			}
 
+		private delegate bool DelQueueUserWorkItem (WaitCallback callback, object state);
+		private static DelQueueUserWorkItem _delQueueUserWorkItem;
+
+		static DelegateExtensions ()
+			{
+			if (CrestronEnvironment.RuntimeEnvironment == eRuntimeEnvironment.SimplSharpPro)
+				{
+				try
+					{
+					var typeMonoThreadPool = Type.GetType ("SSMono.Threading.ThreadPool, SSMonoProThreadingLibrary", false).GetCType ();
+					if (typeMonoThreadPool != null)
+						_delQueueUserWorkItem = (DelQueueUserWorkItem)CDelegate.CreateDelegate (typeof (DelQueueUserWorkItem), null,
+							typeMonoThreadPool.GetMethod ("QueueUserWorkItem", new CType[] {typeof (WaitCallback), typeof (object)}));
+					}
+				catch
+					{
+					}
+				}
+			}
+
 		public static IAsyncResult BeginInvokeEx (this Delegate dlg, AsyncCallback callback, object obj, params object[] args)
 			{
 			var iar = new AsyncResult (dlg, obj);
 			var invokeInfo = new InvokeInfo {result = iar, callback = callback, state = obj, args = args};
-			CrestronInvoke.BeginInvoke (DoDelegate, invokeInfo);
+
+			if (_delQueueUserWorkItem != null)
+				_delQueueUserWorkItem (DoDelegate, invokeInfo);
+			else
+				CrestronInvoke.BeginInvoke (DoDelegate, invokeInfo);
 			return iar;
 			}
 
