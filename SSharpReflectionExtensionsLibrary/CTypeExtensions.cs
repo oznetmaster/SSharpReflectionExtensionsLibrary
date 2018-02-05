@@ -177,5 +177,13 @@ namespace Crestron.SimplSharp.Reflection
 			return Array.CreateInstance (type, new int[rank]).GetType ();
 			}
 
+		public static Type[] GetTypes (this CType[] ctypes)
+			{
+			int len = ctypes.Length;
+			var types = new Type[len];
+			for (int ix = 0; ix < len; ++ix)
+				types[ix] = ctypes[ix];
+			return types;
+			}
 		}
 	}
