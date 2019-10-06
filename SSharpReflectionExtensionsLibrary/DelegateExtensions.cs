@@ -57,7 +57,16 @@ namespace Crestron.SimplSharp
 		/// throws an exception.</exception>
 		public static object DynamicInvoke (this Delegate dlg, params object[] args)
 			{
-			return dlg.GetMethod().Invoke (dlg.Target, BindingFlags.Default, null, args, null);
+			var m = dlg.GetMethod ();
+			if (dlg.Target != null && m.IsStatic)
+				{
+				var newargs = new object[args.Length + 1];
+				newargs[0] = dlg.Target;
+				if (args.Length != 0)
+					args.CopyTo (newargs, 1);
+				args = newargs;
+				}
+			return m.Invoke (dlg.Target, BindingFlags.Default, null, args.Length == 0 ? null : args, null);
 			}
 
 		/// <summary>
@@ -76,7 +85,16 @@ namespace Crestron.SimplSharp
 		/// throws an exception.</exception>
 		public static TResult DynamicInvoke<TResult> (this Delegate dlg, params object[] args)
 			{
-			return (TResult)dlg.GetMethod().Invoke (dlg.Target, BindingFlags.Default, null, args, null);
+			var m = dlg.GetMethod ();
+			if (dlg.Target != null && m.IsStatic)
+				{
+				var newargs = new object[args.Length + 1];
+				newargs[0] = dlg.Target;
+				if (args.Length != 0)
+					args.CopyTo (newargs, 1);
+				args = newargs;
+				}
+			return (TResult)m.Invoke (dlg.Target, BindingFlags.Default, null, args.Length == 0 ? null : args, null);
 			}
 
 		private class InvokeInfo
