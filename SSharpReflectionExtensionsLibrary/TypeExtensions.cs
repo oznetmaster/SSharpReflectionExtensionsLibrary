@@ -339,5 +339,7 @@ namespace Crestron.SimplSharp.Reflection
 
 			return false;
 			}
+
+		public static readonly Type[] TypeEmptyArray = new Type[0];
 		}
 	}

@@ -185,5 +185,20 @@ namespace Crestron.SimplSharp.Reflection
 				types[ix] = ctypes[ix];
 			return types;
 			}
+
+		public static CType GetInterface (this CType ctype, string name, bool ignoreCase)
+			{
+			var interfaces = ctype.GetInterfaces ();
+			foreach (var @interface in interfaces)
+				if (@interface.Name.Equals (name, ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture))
+					return @interface;
+
+			return null;
+			}
+
+		public static CType GetInterface (this CType ctype, string name)
+			{
+			return GetInterface (ctype, name, false);
+			}
 		}
 	}
