@@ -158,27 +158,6 @@ namespace Crestron.SimplSharp.Reflection
 			}
 
 		//======================================================================================
-
-		public static MethodInfo GetMethodInfo (this Delegate del)
-			{
-			return del.GetMethod ();
-			}
-		}
-
-	public struct InterfaceMapping
-		{
-		internal InterfaceMapping (MethodInfo[] interfaceMethods, MethodInfo[] targetMethods, CType interfaceType, CType targetType)
-			{
-			this.InterfaceMethods = interfaceMethods;
-			this.TargetMethods = targetMethods;
-			this.InterfaceType = interfaceType;
-			this.TargetType = targetType;
-			}
-
-		public MethodInfo[] InterfaceMethods;
-		public MethodInfo[] TargetMethods;
-		public CType InterfaceType;
-		public CType TargetType;
 		}
 	}
 

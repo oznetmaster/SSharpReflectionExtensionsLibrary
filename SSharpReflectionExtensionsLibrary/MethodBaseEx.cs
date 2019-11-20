@@ -45,6 +45,9 @@ namespace Crestron.SimplSharp.Reflection
 
 			var stackFrame = ReflectionUtilities.GetStackFrame (level + 1);
 
+			if (stackFrame == null)
+				return null;
+
 			return GetMethodFromStackFrame (stackFrame);
 			}
 

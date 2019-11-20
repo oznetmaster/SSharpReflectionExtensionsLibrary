@@ -1,4 +1,5 @@
 ﻿#region License
+
 /*
  * ReflectionUtilities.cs
  *
@@ -24,9 +25,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharp.CrestronIO;
@@ -63,12 +66,47 @@ namespace Crestron.SimplSharp.Reflection
 
 		internal static string GetStackFrame (string stackTrace, int level)
 			{
-			string[] stackFrames = stackTrace.Split ('\n');
-			if (stackFrames.Length <= level)
-				return null;
+			return SplitEnumerable (stackTrace, '\n', StringSplitOptions.RemoveEmptyEntries).Select (sf => sf.Trim ().Substring (3))
+				.Where (sf =>
+					{
+					var typeName = sf.Substring (0, sf.LastIndexOf ('.')).TrimEnd ('.');
+					var type = Type.GetType (typeName);
+					if (type == null)
+						return Type.GetType (typeName + ", SimplSharpReflectionInterface") == null;
+					var san = type.AssemblySimpleName ();
+					return san != "mscorlib" && san != "SimplSharpReflectionInterface";
+					})
+				.Skip (level)
+				.FirstOrDefault ();
+			}
 
-			string callingFrame = stackFrames[level].Trim ().Substring (3);
-			return callingFrame;
+		internal static IEnumerable<string> SplitEnumerable (string source, char separator, StringSplitOptions stringSplitOptions)
+			{
+			var sourceLength = source.Length;
+
+			var indexOfStartChunk = 0;
+
+			do
+				{
+				var ix = source.IndexOf (separator, indexOfStartChunk);
+				if (ix == -1)
+					{
+					if (sourceLength - indexOfStartChunk != 0 || stringSplitOptions != StringSplitOptions.RemoveEmptyEntries)
+						yield return source.Substring (indexOfStartChunk);
+					yield break;
+					}
+
+				if (indexOfStartChunk == ix && stringSplitOptions != StringSplitOptions.RemoveEmptyEntries)
+					{
+					yield return string.Empty;
+					}
+				else
+					{
+					yield return source.Substring (indexOfStartChunk, ix - indexOfStartChunk);
+					}
+
+				indexOfStartChunk = ix + 1;
+				} while (indexOfStartChunk < sourceLength);
 			}
 
 		internal static CType GetCallingType (int level)
@@ -129,56 +167,60 @@ namespace Crestron.SimplSharp.Reflection
 
 		private static readonly Dictionary<string, Type> DictTypes = new Dictionary<string, Type>
 			{
-				{"bool", typeof (bool)},
-				{"byte", typeof (byte)},
-				{"sbyte", typeof (sbyte)},
-				{"char", typeof (char)},
-				{"decimal", typeof (decimal)},
-				{"double", typeof (double)},
-				{"float", typeof (float)},
-				{"int", typeof (int)},
-				{"uint", typeof (uint)},
-				{"long", typeof (long)},
-				{"ulong", typeof (ulong)},
-				{"object", typeof (object)},
-				{"short", typeof (short)},
-				{"ushort", typeof (ushort)},
-				{"string", typeof (string)},
-				{"Boolean", typeof (Boolean)},
-				{"Byte", typeof (Byte)},
-				{"SByte", typeof (SByte)},
-				{"Char", typeof (Char)},
-				{"Decimal", typeof (Decimal)},
-				{"Double", typeof (Double)},
-				{"Single", typeof (Single)},
-				{"Int32", typeof (Int32)},
-				{"UInt32", typeof (UInt32)},
-				{"Int64", typeof (Int64)},
-				{"UInt64", typeof (UInt64)},
-				{"Object", typeof (Object)},
-				{"Int16", typeof (Int16)},
-				{"UInt16", typeof (UInt16)},
-				{"String", typeof (String)},
-				{"DateTime", typeof (DateTime)},
-				{"System.Boolean", typeof (Boolean)},
-				{"System.Byte", typeof (Byte)},
-				{"System.SByte", typeof (SByte)},
-				{"System.Char", typeof (Char)},
-				{"System.Decimal", typeof (Decimal)},
-				{"System.Double", typeof (Double)},
-				{"System.Single", typeof (Single)},
-				{"System.Int32", typeof (Int32)},
-				{"System.UInt32", typeof (UInt32)},
-				{"System.Int64", typeof (Int64)},
-				{"System.UInt64", typeof (UInt64)},
-				{"System.Object", typeof (Object)},
-				{"System.Int16", typeof (Int16)},
-				{"System.UInt16", typeof (UInt16)},
-				{"System.String", typeof (String)},
-				{"System.DateTime", typeof (DateTime)},
+			{"bool", typeof (bool)},
+			{"byte", typeof (byte)},
+			{"sbyte", typeof (sbyte)},
+			{"char", typeof (char)},
+			{"decimal", typeof (decimal)},
+			{"double", typeof (double)},
+			{"float", typeof (float)},
+			{"int", typeof (int)},
+			{"uint", typeof (uint)},
+			{"long", typeof (long)},
+			{"ulong", typeof (ulong)},
+			{"object", typeof (object)},
+			{"short", typeof (short)},
+			{"ushort", typeof (ushort)},
+			{"string", typeof (string)},
+			{"Boolean", typeof (Boolean)},
+			{"Byte", typeof (Byte)},
+			{"SByte", typeof (SByte)},
+			{"Char", typeof (Char)},
+			{"Decimal", typeof (Decimal)},
+			{"Double", typeof (Double)},
+			{"Single", typeof (Single)},
+			{"Int32", typeof (Int32)},
+			{"UInt32", typeof (UInt32)},
+			{"Int64", typeof (Int64)},
+			{"UInt64", typeof (UInt64)},
+			{"Object", typeof (Object)},
+			{"Int16", typeof (Int16)},
+			{"UInt16", typeof (UInt16)},
+			{"String", typeof (String)},
+			{"DateTime", typeof (DateTime)},
+			{"System.Boolean", typeof (Boolean)},
+			{"System.Byte", typeof (Byte)},
+			{"System.SByte", typeof (SByte)},
+			{"System.Char", typeof (Char)},
+			{"System.Decimal", typeof (Decimal)},
+			{"System.Double", typeof (Double)},
+			{"System.Single", typeof (Single)},
+			{"System.Int32", typeof (Int32)},
+			{"System.UInt32", typeof (UInt32)},
+			{"System.Int64", typeof (Int64)},
+			{"System.UInt64", typeof (UInt64)},
+			{"System.Object", typeof (Object)},
+			{"System.Int16", typeof (Int16)},
+			{"System.UInt16", typeof (UInt16)},
+			{"System.String", typeof (String)},
+			{"System.DateTime", typeof (DateTime)},
 			};
 
-		private static readonly string[] SystemNamespaces = { "System.", "System.Text.", "System.Collections.", "System.Collections.Generic.", "System.Collections.ObjectModel.", "System.Globalization.", "System.Configuration.Assemblies." };
+		private static readonly string[] SystemNamespaces =
+			{
+			"System.", "System.Text.", "System.Collections.", "System.Collections.Generic.",
+			"System.Collections.ObjectModel.", "System.Globalization.", "System.Configuration.Assemblies."
+			};
 
 		private class TypeCacheEntry
 			{
@@ -217,21 +259,21 @@ namespace Crestron.SimplSharp.Reflection
 
 			if (!typeName.Contains ('.'))
 				foreach (var sys in SystemNamespaces)
-				{
-				var sysName = sys + typeName;
-				easyType = Type.GetType (sysName);
-				if (easyType != null)
 					{
-					AddToCache (sysName, easyType);
+					var sysName = sys + typeName;
+					easyType = Type.GetType (sysName);
+					if (easyType != null)
+						{
+						AddToCache (sysName, easyType);
 
-					return easyType;
+						return easyType;
+						}
 					}
-				}
 
 			var foundType = Assemblies.Select (assembly => assembly.GetType (typeName)).FirstOrDefault (type => type != null);
 
 			if (foundType != null)
-				AddToCache(typeName, foundType);
+				AddToCache (typeName, foundType);
 
 			return foundType;
 			}
@@ -240,7 +282,7 @@ namespace Crestron.SimplSharp.Reflection
 			{
 			lock (Cache)
 				{
-				Cache[typeName] = new TypeCacheEntry { Type = type, Order = ++_cacheOrder };
+				Cache[typeName] = new TypeCacheEntry {Type = type, Order = ++_cacheOrder};
 				if (_cacheOrder > Cachemaxorder)
 					ReorderCache ();
 				}

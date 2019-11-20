@@ -61,5 +61,30 @@ namespace Crestron.SimplSharp.Reflection
 
 			return callingType == null ? null : callingType.Assembly;
 			}
+
+		public static byte[] GetPublicKeyToken (this Assembly assembly)
+			{
+			return assembly.GetName ().GetPublicKeyToken ();
+			}
+
+		public static byte[] GetPublicKey (this Assembly assembly)
+			{
+			return assembly.GetName ().GetPublicKey ();
+			}
+
+		public static Version GetVersion (this Assembly assembly)
+			{
+			return assembly.GetName ().Version;
+			}
+
+		public static string GetSimpleName (this Assembly assembly)
+			{
+			return assembly.GetName ().Name;
+			}
+
+		public static AssemblyNameFlags GetFlags (this Assembly assembly)
+			{
+			return assembly.GetName ().Flags;
+			}
 		}
 	}
