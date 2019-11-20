@@ -94,6 +94,16 @@ namespace Crestron.SimplSharp.Reflection
 			return ctype.GetConstructor (MakeTypeArray (types));
 			}
 
+		public static MethodInfo GetMethod (this CType ctype, string name, Type[] types)
+			{
+			return ctype.GetMethod (name, MakeTypeArray (types));
+			}
+
+		public static MemberInfo[] GetMember (this CType type, string name, MemberTypes memberType, BindingFlags bindingAttr)
+			{
+			return type.GetMember (name, bindingAttr).Where (m => m.MemberType == memberType).ToArray ();
+			}
+
 		public static MethodInfo GetGenericMethod (this CType ctype, string name)
 			{
 			var members = ctype.GetMember (name).Where (m => m.MemberType == MemberTypes.Method && ((MethodInfo)m).IsGenericMethod).ToArray ();
@@ -199,6 +209,16 @@ namespace Crestron.SimplSharp.Reflection
 		public static CType GetInterface (this CType ctype, string name)
 			{
 			return GetInterface (ctype, name, false);
+			}
+
+		public static bool IsEquivalentTo (this CType ctype, CType other)
+			{
+			return (ctype == other);
+			}
+
+		public static bool IsEquivalentTo (this CType ctype, Type other)
+			{
+			return (ctype == other);
 			}
 		}
 	}

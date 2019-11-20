@@ -179,6 +179,14 @@ namespace Crestron.SimplSharp
 			{
 			return (TResult)dlg.EndInvokeEx (result);
 			}
+
+		public static MethodInfo GetMethodInfo (this Delegate del)
+			{
+			if (del == null)
+				throw new ArgumentNullException ("del");
+
+			return del.GetMethod();
+			}
 		}
 
 	public static class DelegateEx

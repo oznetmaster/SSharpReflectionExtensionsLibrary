@@ -29,13 +29,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Crestron.SimplSharp;
 using System.Globalization;
 
 namespace Crestron.SimplSharp.Reflection
 	{
-	public static class TypeExtensions
+	public static class TypeEx
 		{
 		public static CType[] GetCTypes (this Type[] types)
 			{
@@ -85,6 +86,11 @@ namespace Crestron.SimplSharp.Reflection
 		public static MemberInfo[] GetMember (this Type type, string name, BindingFlags bindingAttr)
 			{
 			return type.GetCType ().GetMember (name, bindingAttr);
+			}
+
+		public static MemberInfo[] GetMember (this Type type, string name, MemberTypes memberType, BindingFlags bindingAttr)
+			{
+			return type.GetCType ().GetMember (name, bindingAttr).Where (m => m.MemberType == memberType).ToArray ();
 			}
 
 		public static MemberInfo[] GetMembers (this Type type, BindingFlags bindingAttr)
@@ -232,7 +238,7 @@ namespace Crestron.SimplSharp.Reflection
 			return assemblyName;
 			}
 
-		public static string AssemblyName (this Type type)
+		public static string AssemblySimpleName (this Type type)
 			{
 			var assemblyFullName = type.AssemblyFullName ();
 			var ix = assemblyFullName.IndexOf (',');
@@ -259,6 +265,97 @@ namespace Crestron.SimplSharp.Reflection
 				return CultureInfo.InvariantCulture;
 
 			return CultureInfo.GetCultureInfo (culture);
+			}
+
+		public static string AssemblyPublicKeyToken (this Type type)
+			{
+			var assemblyFullName = type.AssemblyFullName ();
+			var ix = assemblyFullName.IndexOf ("PublicKeyToken=", StringComparison.InvariantCulture);
+			if (ix == -1)
+				return null;
+
+			return assemblyFullName.Substring (ix + 15);
+			}
+
+		public static AssemblyName AssemblyName (this Type type)
+			{
+			var an = new AssemblyName
+				{
+				Name = type.AssemblySimpleName (),
+				CultureInfo = type.AssemblyCultureInfo (),
+				Version = type.AssemblyVersion (),
+				};
+
+			var apkt = type.AssemblyPublicKeyToken ();
+			if (apkt != null)
+				an.SetPublicKeyToken (apkt.HexToBytes());
+
+			return an;
+			}
+
+		public static string AssemblyFullName (this string aqn)
+			{
+			string typeName, assemblyName;
+			SplitFullyQualifiedTypeName (aqn, out typeName, out assemblyName);
+
+			return assemblyName;
+			}
+
+		public static string AssemblySimpleName (this string aqn)
+			{
+			var assemblyFullName = aqn.AssemblyFullName ();
+			var ix = assemblyFullName.IndexOf (',');
+			return ix == -1 ? assemblyFullName : assemblyFullName.Substring (0, ix);
+			}
+
+		public static Version AssemblyVersion (this string aqn)
+			{
+			var assemblyFullName = aqn.AssemblyFullName ();
+			var ix = assemblyFullName.IndexOf ("Version=", StringComparison.InvariantCulture);
+			if (ix == -1)
+				return new Version (0, 0, 0, 0);
+			var version = assemblyFullName.Substring (ix + 8, assemblyFullName.IndexOf (',', ix + 8) - (ix + 8));
+			return new Version (version);
+			}
+
+		public static CultureInfo AssemblyCultureInfo (this string aqn)
+			{
+			var assemblyFullName = aqn.AssemblyFullName ();
+			var ix = assemblyFullName.IndexOf ("Culture=", StringComparison.InvariantCulture);
+			if (ix == -1)
+				return CultureInfo.InvariantCulture;
+
+			var culture = assemblyFullName.Substring (ix + 8, assemblyFullName.IndexOf (',', ix + 8) - (ix + 8));
+			if (culture == "neutral")
+				return CultureInfo.InvariantCulture;
+
+			return CultureInfo.GetCultureInfo (culture);
+			}
+
+		public static string AssemblyPublicKeyToken (this string aqn)
+			{
+			var assemblyFullName = aqn.AssemblyFullName ();
+			var ix = assemblyFullName.IndexOf ("PublicKeyToken=", StringComparison.InvariantCulture);
+			if (ix == -1)
+				return null;
+
+			return assemblyFullName.Substring (ix + 15);
+			}
+
+		public static AssemblyName AssemblyName (this string aqn)
+			{
+			var an = new AssemblyName
+			{
+				Name = aqn.AssemblySimpleName (),
+				CultureInfo = aqn.AssemblyCultureInfo (),
+				Version = aqn.AssemblyVersion (),
+			};
+
+			var apkt = aqn.AssemblyPublicKeyToken ();
+			if (apkt != null)
+				an.SetPublicKeyToken (apkt.HexToBytes ());
+
+			return an;
 			}
 
 		public static void SplitFullyQualifiedTypeName (string fullyQualifiedTypeName, out string typeName, out string assemblyName)
@@ -340,6 +437,73 @@ namespace Crestron.SimplSharp.Reflection
 			return false;
 			}
 
-		public static readonly Type[] TypeEmptyArray = new Type[0];
+		public static readonly Type[] EmptyTypes = new Type[0];
+
+		public static bool IsEquivalentTo (this Type type, Type other)
+			{
+			return (type == other);
+			}
+
+		public static bool IsEquivalentTo (this Type type, CType other)
+			{
+			return (type == other);
+			}
+
+		public static Type GetEnumUnderlyingType (this Type type)
+			{
+			if (!type.IsEnum)
+				throw new ArgumentException ("Must be an enum type", "type");
+
+			var size = Marshal.SizeOf (type);
+			switch (size)
+				{
+				case 1:
+					return typeof (byte);
+				case 2:
+					return typeof (short);
+				case 4:
+					return typeof (int);
+				case 8:
+					return typeof (long);
+				}
+
+			throw new InvalidOperationException ("unknow enum type");
+			}
+
+		public static bool IsConstructedGenericType (this Type type)
+			{
+			return type.IsGenericType && !type.IsGenericTypeDefinition;
+			}
+
+	[ComVisible (true)]
+		public static InterfaceMapping GetInterfaceMap (this Type type, Type interfaceType)
+			{
+			//if (!type.IsSystemType)
+			//	throw new NotSupportedException ("Derived classes must provide an implementation.");
+			if (interfaceType == null)
+				throw new ArgumentNullException ("interfaceType");
+			//if (!interfaceType.IsSystemType)
+			//	throw new ArgumentException ("interfaceType", "Type is an user type");
+			InterfaceMapping res;
+			if (!interfaceType.IsInterface)
+				throw new ArgumentException ("Argument must be an interface.", "interfaceType");
+			if (type.IsInterface)
+				throw new ArgumentException ("'this' type cannot be an interface itself");
+			if (type.IsGenericParameter)
+				throw new InvalidOperationException ("'this' type cannot be a generic parameter");
+			res.TargetType = type;
+			res.InterfaceType = interfaceType;
+			GetInterfaceMapData (res.TargetType, res.InterfaceType, out res.TargetMethods, out res.InterfaceMethods);
+			if (res.TargetMethods == null)
+				throw new ArgumentException ("Interface not found", "interfaceType");
+
+			return res;
+			}
+
+		private static void GetInterfaceMapData (CType type, CType interfaceType, out MethodInfo[] targetMethods, out MethodInfo[] interfaceMethods)
+			{
+			targetMethods = type.GetMethods ().Where (mi => interfaceType.IsAssignableFrom (mi.DeclaringType)).ToArray ();
+			interfaceMethods = interfaceType.GetMethods();
+			}
 		}
 	}
