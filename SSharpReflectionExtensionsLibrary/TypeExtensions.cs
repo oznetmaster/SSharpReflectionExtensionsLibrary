@@ -1,4 +1,5 @@
 ﻿#region License
+
 /*
  * TypeExtensions.cs
  *
@@ -24,6 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #endregion
 
 using System;
@@ -118,14 +120,129 @@ namespace Crestron.SimplSharp.Reflection
 			return type.GetCType ().GetMethod (name, bindingAttr, binder, types, modifiers);
 			}
 
-		public static MethodInfo GetMethod (this Type type, string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConventions, Type[] types, ParameterModifier[] modifiers)
+		public static MethodInfo GetMethod (
+			this Type type, string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConventions, Type[] types, ParameterModifier[] modifiers)
 			{
 			return type.GetCType ().GetMethod (name, bindingAttr, binder, callConventions, types.GetCTypes (), modifiers);
 			}
 
-		public static MethodInfo GetMethod (this Type type, string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConventions, CType[] types, ParameterModifier[] modifiers)
+		public static MethodInfo GetMethod (
+			this Type type, string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConventions, CType[] types, ParameterModifier[] modifiers)
 			{
 			return type.GetCType ().GetMethod (name, bindingAttr, binder, callConventions, types, modifiers);
+			}
+
+		public static MethodInfo GetMethod (this Type type, string name, bool generic)
+			{
+			if (type == null)
+				throw new ArgumentNullException ("type");
+			if (String.IsNullOrEmpty (name))
+				throw new ArgumentNullException ("name");
+			return type.GetCType ().GetMethods ().FirstOrDefault (method => method.Name == name & method.IsGenericMethod == generic);
+			}
+
+		public static MethodInfo GetMethod<T> (this Type type, string name)
+			{
+			var genMethod = type.GetMethod (name, true);
+			return genMethod == null ? null : genMethod.MakeGenericMethod (typeof(T));
+			}
+
+		public static MethodInfo GetNonGenericMethod (this Type type, string name)
+			{
+			return type.GetMethod (name, false);
+			}
+
+		public static MethodInfo GetMethod<T> (this Type type, string name, CType[] types)
+			{
+			return GetMethod<T> (type, name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public, types);
+			}
+
+		public static MethodInfo GetMethod<T> (this Type type, string name, BindingFlags bindingAttr, CType[] types)
+			{
+			if (type == null)
+				throw new ArgumentNullException ("type");
+
+			if (types == null)
+				types = ArrayEx.Empty<CType> ();
+
+			var methods = type.GetCType ().GetMethods (bindingAttr);
+			var listMethods = new List<MethodInfo> ();
+			foreach (var oMethod in methods)
+				{
+				if (!string.Equals (oMethod.Name, name))
+					continue;
+				if (!oMethod.IsGenericMethod)
+					continue;
+				var mi = oMethod.MakeGenericMethod (typeof (T));
+				var aoParameter = mi.GetParameters ();
+				if (aoParameter.Length != types.Length)
+					continue;
+				int iParamMatch = 0;
+				for (int ixParam = 0; ixParam < aoParameter.Length; ixParam++)
+					{
+					if (aoParameter[ixParam].ParameterType == types[ixParam])
+						iParamMatch++;
+					}
+				if (iParamMatch != aoParameter.Length)
+					continue;
+				listMethods.Add (mi);
+				}
+
+			if (listMethods.Count != 1)
+				{
+				string sError = "Method with Name '" + name + "' and BindingFlags '" + bindingAttr + "' and Parameter Types '" + types.ToString () + "'";
+				if (listMethods.Count == 0)
+					throw new MissingMethodException (sError + " has no match.");
+				else
+					throw new AmbiguousMatchException (sError + " has " + listMethods.Count + " matches.", null);
+				}
+			return listMethods[0];
+			}
+
+		public static MethodInfo GetNonGenericMethod (this Type type, string name, CType[] types)
+			{
+			return GetNonGenericMethod (type, name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public, types);
+			}
+
+		public static MethodInfo GetNonGenericMethod (this Type type, string name, BindingFlags bindingAttr, CType[] types)
+			{
+			if (type == null)
+				throw new ArgumentNullException ("type");
+
+			if (types == null)
+				types = ArrayEx.Empty<CType> ();
+
+			var methods = type.GetCType().GetMethods (bindingAttr);
+			var listMethods = new List<MethodInfo> ();
+			foreach (var mi in methods)
+				{
+				if (!string.Equals (mi.Name, name))
+					continue;
+				if (mi.IsGenericMethod)
+					continue;
+				var aoParameter = mi.GetParameters ();
+				if (aoParameter.Length != types.Length)
+					continue;
+				int iParamMatch = 0;
+				for (int ixParam = 0; ixParam < aoParameter.Length; ixParam++)
+					{
+					if (aoParameter[ixParam].ParameterType == types[ixParam])
+						iParamMatch++;
+					}
+				if (iParamMatch != aoParameter.Length)
+					continue;
+				listMethods.Add (mi);
+				}
+
+			if (listMethods.Count != 1)
+				{
+				string sError = "Method with Name '" + name + "' and BindingFlags '" + bindingAttr + "' and Parameter Types '" + types.ToString () + "'";
+				if (listMethods.Count == 0)
+					throw new MissingMethodException (sError + " has no match.");
+				else
+					throw new AmbiguousMatchException (sError + " has " + listMethods.Count + " matches.", null);
+				}
+			return listMethods[0];
 			}
 
 		public static MethodInfo[] GetMethods (this Type type, BindingFlags bindingAttr)
@@ -183,22 +300,26 @@ namespace Crestron.SimplSharp.Reflection
 			return type.GetCType ().GetProperty (name, returnType, types, modifiers);
 			}
 
-		public static PropertyInfo GetProperty (this Type type, string name, BindingFlags bindingAttr, Binder binder, CType returnType, Type[] types, ParameterModifier[] modifiers)
+		public static PropertyInfo GetProperty (
+			this Type type, string name, BindingFlags bindingAttr, Binder binder, CType returnType, Type[] types, ParameterModifier[] modifiers)
 			{
 			return type.GetCType ().GetProperty (name, bindingAttr, binder, returnType, types.GetCTypes (), modifiers);
 			}
 
-		public static PropertyInfo GetProperty (this Type type, string name, BindingFlags bindingAttr, Binder binder, CType returnType, CType[] types, ParameterModifier[] modifiers)
+		public static PropertyInfo GetProperty (
+			this Type type, string name, BindingFlags bindingAttr, Binder binder, CType returnType, CType[] types, ParameterModifier[] modifiers)
 			{
 			return type.GetCType ().GetProperty (name, bindingAttr, binder, returnType, types, modifiers);
 			}
 
-		public static PropertyInfo GetProperty (this Type type, string name, BindingFlags bindingAttr, Binder binder, Type returnType, CType[] types, ParameterModifier[] modifiers)
+		public static PropertyInfo GetProperty (
+			this Type type, string name, BindingFlags bindingAttr, Binder binder, Type returnType, CType[] types, ParameterModifier[] modifiers)
 			{
 			return type.GetCType ().GetProperty (name, bindingAttr, binder, returnType, types, modifiers);
 			}
 
-		public static PropertyInfo GetProperty (this Type type, string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers)
+		public static PropertyInfo GetProperty (
+			this Type type, string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers)
 			{
 			return type.GetCType ().GetProperty (name, bindingAttr, binder, returnType, types.GetCTypes (), modifiers);
 			}
@@ -279,16 +400,11 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static AssemblyName AssemblyName (this Type type)
 			{
-			var an = new AssemblyName
-				{
-				Name = type.AssemblySimpleName (),
-				CultureInfo = type.AssemblyCultureInfo (),
-				Version = type.AssemblyVersion (),
-				};
+			var an = new AssemblyName {Name = type.AssemblySimpleName (), CultureInfo = type.AssemblyCultureInfo (), Version = type.AssemblyVersion (),};
 
 			var apkt = type.AssemblyPublicKeyToken ();
 			if (apkt != null)
-				an.SetPublicKeyToken (apkt.HexToBytes());
+				an.SetPublicKeyToken (apkt.HexToBytes ());
 
 			return an;
 			}
@@ -344,12 +460,7 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static AssemblyName AssemblyName (this string aqn)
 			{
-			var an = new AssemblyName
-			{
-				Name = aqn.AssemblySimpleName (),
-				CultureInfo = aqn.AssemblyCultureInfo (),
-				Version = aqn.AssemblyVersion (),
-			};
+			var an = new AssemblyName {Name = aqn.AssemblySimpleName (), CultureInfo = aqn.AssemblyCultureInfo (), Version = aqn.AssemblyVersion (),};
 
 			var apkt = aqn.AssemblyPublicKeyToken ();
 			if (apkt != null)
@@ -365,7 +476,9 @@ namespace Crestron.SimplSharp.Reflection
 			if (assemblyDelimiterIndex != null)
 				{
 				typeName = fullyQualifiedTypeName.Substring (0, assemblyDelimiterIndex.GetValueOrDefault ()).Trim ();
-				assemblyName = fullyQualifiedTypeName.Substring (assemblyDelimiterIndex.GetValueOrDefault () + 1, fullyQualifiedTypeName.Length - assemblyDelimiterIndex.GetValueOrDefault () - 1).Trim ();
+				assemblyName =
+					fullyQualifiedTypeName.Substring (assemblyDelimiterIndex.GetValueOrDefault () + 1,
+						fullyQualifiedTypeName.Length - assemblyDelimiterIndex.GetValueOrDefault () - 1).Trim ();
 				}
 			else
 				{
@@ -423,15 +536,13 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static bool IsSerializable (this Type type)
 			{
-			if (type.GetCustomAttributes (typeof (SerializableAttribute), false).Length != 0)
+			if (type.GetCustomAttributes (typeof(SerializableAttribute), false).Length != 0)
 				return true;
 
 			for (Type t = type.UnderlyingSystemType; t != null; t = t.BaseType)
 				{
-				if ((t == typeof (Enum)) || (t == typeof (Delegate)))
-					{
+				if ((t == typeof(Enum)) || (t == typeof(Delegate)))
 					return true;
-					}
 				}
 
 			return false;
@@ -458,13 +569,13 @@ namespace Crestron.SimplSharp.Reflection
 			switch (size)
 				{
 				case 1:
-					return typeof (byte);
+					return typeof(byte);
 				case 2:
-					return typeof (short);
+					return typeof(short);
 				case 4:
-					return typeof (int);
+					return typeof(int);
 				case 8:
-					return typeof (long);
+					return typeof(long);
 				}
 
 			throw new InvalidOperationException ("unknow enum type");
@@ -475,7 +586,7 @@ namespace Crestron.SimplSharp.Reflection
 			return type.IsGenericType && !type.IsGenericTypeDefinition;
 			}
 
-	[ComVisible (true)]
+		[ComVisible (true)]
 		public static InterfaceMapping GetInterfaceMap (this Type type, Type interfaceType)
 			{
 			//if (!type.IsSystemType)
@@ -503,7 +614,7 @@ namespace Crestron.SimplSharp.Reflection
 		private static void GetInterfaceMapData (CType type, CType interfaceType, out MethodInfo[] targetMethods, out MethodInfo[] interfaceMethods)
 			{
 			targetMethods = type.GetMethods ().Where (mi => interfaceType.IsAssignableFrom (mi.DeclaringType)).ToArray ();
-			interfaceMethods = interfaceType.GetMethods();
+			interfaceMethods = interfaceType.GetMethods ();
 			}
 		}
 	}
