@@ -109,6 +109,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyInfoExtensions.cs" />
     <Compile Include="ReflectionUtilities.cs" />
+    <Compile Include="StackFrame.cs" />
+    <Compile Include="StackTrace.cs" />
     <Compile Include="System.Reflection.Emit\FlowControl.cs" />
     <Compile Include="System.Reflection.Emit\OpCode.cs" />
     <Compile Include="System.Reflection.Emit\OpCodeNames.cs" />

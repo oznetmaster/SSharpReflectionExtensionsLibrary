@@ -51,7 +51,7 @@ namespace Crestron.SimplSharp.Reflection
 			return GetMethodFromStackFrame (stackFrame);
 			}
 
-		private static MethodBase GetMethodFromStackFrame (string stackFrame)
+		internal static MethodBase GetMethodFromStackFrame (string stackFrame)
 			{
 			string[] genericArguments;
 
