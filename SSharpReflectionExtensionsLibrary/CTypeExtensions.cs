@@ -198,10 +198,19 @@ namespace Crestron.SimplSharp.Reflection
 
 		public static CType GetInterface (this CType ctype, string name, bool ignoreCase)
 			{
+			var ldot = name.LastIndexOf ('.');
+			var ns = ldot == -1 ? string.Empty : name.Substring (0, ldot); 
+			var na = ldot == -1 ? name : name.Substring (ldot + 1);
+
 			var interfaces = ctype.GetInterfaces ();
 			foreach (var @interface in interfaces)
-				if (@interface.Name.Equals (name, ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture))
-					return @interface;
+				{
+				if (ns.Length != 0 && !@interface.Namespace.Equals (ns, StringComparison.InvariantCulture))
+					continue;
+
+				if (@interface.Name.Equals (na, ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture))
+						return @interface;
+				}
 
 			return null;
 			}
